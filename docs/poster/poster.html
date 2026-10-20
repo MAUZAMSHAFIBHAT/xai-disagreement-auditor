@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>XAI Disagreement Auditor — Poster</title>
+<style>
+  @page { size: 36in 48in; margin: 0; }
+  :root{
+    --ink:#0b0b0b; --ink2:#2f2e2c; --ink3:#52514e; --muted:#7c7a74;
+    --rule:#d9d8d1; --surface:#ffffff; --page:#f4f3ef;
+    --blue:#2a78d6; --deep:#184f95; --navy:#0d366b;
+    --yellow:#eda100; --red:#d03b3b; --green:#0ca30c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{width:3456px; height:4608px;}
+  body{
+    background:var(--page); color:var(--ink2);
+    font-family:"Helvetica Neue", Helvetica, Arial, "DejaVu Sans", sans-serif;
+    font-size:33px; line-height:1.4; -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    display:flex; flex-direction:column;
+  }
+  b, strong{color:var(--ink); font-weight:700;}
+  em{font-style:normal; color:var(--deep); font-weight:600;}
+
+  /* ---------- header ---------- */
+  header{
+    padding:76px 100px 72px 100px; color:#fff;
+    background:
+      radial-gradient(1900px 700px at 2% 0%, #3987e5 0%, rgba(57,135,229,0) 62%),
+      radial-gradient(1500px 800px at 100% 100%, #5a49c9 0%, rgba(90,73,201,0) 60%),
+      linear-gradient(118deg, #0d366b 0%, #184f95 52%, #2a2466 100%);
+    display:flex; align-items:center; gap:80px;
+  }
+  header .lead{flex:1;}
+  .eyebrow{font-size:34px; letter-spacing:.3em; text-transform:uppercase; font-weight:700; opacity:.85;}
+  h1{font-size:150px; line-height:1.02; font-weight:800; letter-spacing:-.025em; margin:24px 0 26px 0; color:#fff;}
+  .sub{font-size:52px; line-height:1.3; opacity:.95; max-width:2050px;}
+  .byline{margin-top:30px; font-size:34px; opacity:.88;}
+  .headline-stat{width:560px; border-left:3px solid rgba(255,255,255,.32); padding-left:60px;}
+  .headline-stat .num{font-size:170px; font-weight:800; line-height:1; letter-spacing:-.03em;}
+  .headline-stat .cap{font-size:32px; opacity:.92; margin-top:16px; line-height:1.35;}
+
+  /* ---------- layout ---------- */
+  main{flex:1; padding:50px 100px 0 100px; display:flex; flex-direction:column; gap:42px;}
+  .row{display:grid; gap:42px;}
+  .r-top{grid-template-columns: 1.06fr 1.32fr 1.12fr;}
+  .r-three{grid-template-columns: repeat(3, 1fr);}
+  .r-bottom{grid-template-columns: 1.1fr 1fr 1fr;}
+
+  .card{background:var(--surface); border:2px solid var(--rule); border-radius:26px; padding:40px 44px 42px 44px;}
+  h2{font-size:48px; font-weight:800; color:var(--ink); letter-spacing:-.015em; line-height:1.1;
+     margin-bottom:6px; display:flex; align-items:baseline; gap:18px;}
+  h2 .n{font-size:30px; font-weight:800; color:#fff; background:var(--blue); border-radius:12px;
+        padding:6px 17px; letter-spacing:0;}
+  h3{font-size:36px; font-weight:700; color:var(--ink); margin:26px 0 6px 0;}
+  p{margin-top:14px;}
+  p.tight{margin-top:8px;}
+
+  figure{margin-top:20px;}
+  figure img{width:100%; display:block; border-radius:14px;}
+  figcaption{font-size:28px; color:var(--ink3); margin-top:14px; line-height:1.4;}
+
+  ul{margin:10px 0 0 0; list-style:none;}
+  li{position:relative; padding-left:40px; margin-top:14px;}
+  li::before{content:""; position:absolute; left:6px; top:18px; width:15px; height:15px;
+             border-radius:4px; background:var(--blue);}
+  li.warn::before{background:var(--yellow);} li.risk::before{background:var(--red);} li.ok::before{background:var(--green);}
+
+  .pill{display:inline-block; border:2px solid var(--rule); border-radius:999px; padding:7px 22px;
+        font-size:28px; color:var(--ink3); margin:10px 10px 0 0; background:#fbfbf9;}
+
+  .formula{margin-top:22px; background:#f2f7fd; border:2px solid #cfe1f8; border-radius:18px;
+           padding:28px 32px; color:var(--ink);}
+  .formula .eq{font-size:35px; font-weight:700; letter-spacing:-.01em; line-height:1.45;}
+  .formula .note{font-size:28px; color:var(--ink3); margin-top:12px; line-height:1.4;}
+
+  .steps{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-top:22px;}
+  .step{background:#fbfbf9; border:2px solid var(--rule); border-radius:18px; padding:20px 22px;}
+  .step .t{font-size:32px; font-weight:800; color:var(--ink);}
+  .step .d{font-size:27px; color:var(--ink3); margin-top:6px; line-height:1.32;}
+  .step .i{display:inline-block; font-size:25px; font-weight:800; color:#fff; background:var(--navy);
+           border-radius:9px; padding:3px 13px; margin-bottom:8px;}
+
+  table{width:100%; border-collapse:collapse; margin-top:18px; font-size:29px;}
+  td{padding:12px 12px 12px 0; border-bottom:2px solid #efeee9; vertical-align:top; color:var(--ink3);}
+  td.m{font-weight:700; color:var(--ink); white-space:nowrap;}
+  .swatch{display:inline-block; width:22px; height:22px; border-radius:6px; margin-right:12px; vertical-align:-2px;}
+
+  .finding{border-left:10px solid var(--blue); background:#f2f7fd; border-radius:14px;
+           padding:22px 26px; margin-top:20px; font-size:31px;}
+  .finding.good{border-left-color:var(--green); background:#eef8ee;}
+  .finding.warn{border-left-color:var(--yellow); background:#fff8e6;}
+  .finding b{display:block; font-size:34px; margin-bottom:4px;}
+
+  .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:22px;}
+  .stat{background:#fbfbf9; border:2px solid var(--rule); border-radius:18px; padding:20px 22px;}
+  .stat .v{font-size:58px; font-weight:800; color:var(--ink); letter-spacing:-.02em; line-height:1;}
+  .stat .l{font-size:26px; color:var(--ink3); margin-top:8px; line-height:1.3;}
+
+  code{font-family:"DejaVu Sans Mono", Menlo, Consolas, monospace; font-size:29px;
+       background:#f1f0ec; border-radius:8px; padding:3px 12px; color:var(--ink);}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:42px; padding:46px 100px 56px 100px; background:#efeee9; border-top:3px solid var(--rule);
+         display:grid; grid-template-columns: 1.25fr 1fr 360px; gap:60px; align-items:start;}
+  footer h4{font-size:30px; text-transform:uppercase; letter-spacing:.14em; color:var(--muted);
+            font-weight:800; margin-bottom:12px;}
+  footer .refs{font-size:25px; color:var(--muted); line-height:1.5;}
+  footer .run{font-size:30px; color:var(--ink3); line-height:1.7;}
+  .qr{text-align:center;}
+  .qr img{width:300px; height:300px; display:block; border:2px solid var(--rule); border-radius:18px; background:#fff;}
+  .qr .cap{font-size:25px; color:var(--muted); margin-top:12px; line-height:1.35;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lead">
+    <div class="eyebrow">AIPI 590 · Emerging Trends in Explainable AI · Project 1</div>
+    <h1>When explanations disagree,<br>which one do you trust?</h1>
+    <div class="sub">A per-prediction <b style="color:#fff">Explanation Trust Score</b> for post-hoc XAI — and a
+      ground-truth benchmark testing whether disagreement actually signals that explanations are wrong.</div>
+    <div class="byline">Mauzam Shafi Bhat · Duke University · Fall 2026 · Instructor: Dr. Brinnae Bent</div>
+  </div>
+  <div class="headline-stat">
+    <div class="num">r=.61</div>
+    <div class="cap">Correlation between how much five explanation methods agree and how often they identify the
+      <b style="color:#fff">true</b> drivers — across 400 predictions.</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ ROW 1 ============ -->
+  <div class="row r-top">
+    <section class="card">
+      <h2><span class="n">1</span> The problem</h2>
+      <p>Post-hoc explainers are how high-stakes model decisions get justified — a denied loan, a flagged tumour —
+        and increasingly how organisations demonstrate compliance. But run several on the <b>same</b> prediction and
+        they routinely disagree: different top features, different rankings, sometimes <b>opposite directions</b>.
+        Krishna et al. (2022) named this the <em>disagreement problem</em> and found practitioners resolve it by
+        intuition or by defaulting to a favourite tool.</p>
+      <p>Nobody is told <b>when</b> an explanation is unreliable. A single SHAP plot looks equally authoritative
+        whether every method agrees with it or none do.</p>
+
+      <h3>Research questions</h3>
+      <ul>
+        <li><b>Q1</b> Can disagreement be quantified into a usable per-prediction reliability signal?</li>
+        <li><b>Q2</b> When methods disagree, are explanations actually <b>wrong</b> more often?</li>
+        <li><b>Q3</b> What drives disagreement — the data, or the model?</li>
+      </ul>
+
+      <h3>The five methods audited</h3>
+      <table>
+        <tr><td class="m"><span class="swatch" style="background:#2a78d6"></span>Shapley (sampling)</td>
+            <td>Game-theoretic credit over random feature orderings</td></tr>
+        <tr><td class="m"><span class="swatch" style="background:#eb6834"></span>LIME</td>
+            <td>Local weighted linear surrogate</td></tr>
+        <tr><td class="m"><span class="swatch" style="background:#1baf7a"></span>Integrated Gradients</td>
+            <td>Path integral from an average input to this one</td></tr>
+        <tr><td class="m"><span class="swatch" style="background:#eda100"></span>SmoothGrad × Input</td>
+            <td>Noise-averaged local gradient × input</td></tr>
+        <tr><td class="m"><span class="swatch" style="background:#e87ba4"></span>Occlusion</td>
+            <td>Prediction drop when a feature is marginalised out</td></tr>
+      </table>
+      <p class="tight" style="font-size:28px; margin-top:18px;">All five implemented from scratch in NumPy so they
+        share one model, one background sample and one baseline — disagreement is methodological, not an artefact of
+        library defaults. Verified exact on linear models; Shapley matches the reference <code>shap</code> library at
+        r &gt; 0.99.</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">2</span> One prediction, five stories</h2>
+      <p class="tight">A single loan applicant, P(default) = 0.77, under a gradient-boosted model. Each column is a
+        method; each cell is that method's <b>rank</b> for that feature; colour is the signed share of the
+        explanation.</p>
+      <figure>
+        <img src="{{FIG_FINGERPRINT}}" alt="Feature-by-method heatmap of explanation ranks">
+        <figcaption><b>debt_to_income</b> is ranked #1 by three methods and #9 by a fourth.
+          <b>annual_income</b> is #1 for two and #10 for another. <b>customer_id_hash</b> — a meaningless identifier
+          by construction — reaches the top 2 for two methods. Trust Score: <b>56 / 100 (Medium)</b>.
+          <span style="color:var(--muted)">* marks contested features: in some methods' top-5 but not others', or
+          pushed in opposite directions.</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">3</span> What I built</h2>
+      <div class="steps">
+        <div class="step"><div class="i">1</div><div class="t">Explain</div>
+          <div class="d">5 methods · identical model, background and baseline</div></div>
+        <div class="step"><div class="i">2</div><div class="t">Compare</div>
+          <div class="d">6 agreement metrics × 10 method pairs</div></div>
+        <div class="step"><div class="i">3</div><div class="t">Score</div>
+          <div class="d">Trust Score 0–100 + contested features</div></div>
+        <div class="step"><div class="i">4</div><div class="t">Verify</div>
+          <div class="d">Faithfulness tests + synthetic ground truth</div></div>
+      </div>
+
+      <div class="formula">
+        <div class="eq">agree(a,b) = ⅓ · [ FeatureAgreement@k<br>&nbsp;&nbsp;+ SignAgreement@k + (1 + ρ<sub>Spearman</sub>)/2 ]</div>
+        <div class="eq" style="margin-top:10px;">Trust = 100 × mean over 10 pairs</div>
+        <div class="note"><b>Which</b> features matter, <b>which way</b> they push, and the <b>whole ranking</b>.
+          Bands: High ≥ 70 · Medium · Low &lt; 50. Metrics follow Krishna et al. (2022).</div>
+      </div>
+
+      <h3>Verified two independent ways</h3>
+      <ul>
+        <li><b>Faithfulness</b> — PGI / PGU / deletion curves against a random-attribution control: does the
+          explanation match the <b>model</b>?</li>
+        <li><b>Ground truth</b> — synthetic data whose true drivers are known by construction: does it match
+          <b>reality</b>? 8 features, 4 informative, ρ swept 0 → 0.95, 4 model families, 20 predictions each.</li>
+      </ul>
+
+      <h3>Delivered artifact</h3>
+      <div>
+        <span class="pill">6-page dashboard</span><span class="pill">REST API</span><span class="pill">CLI benchmark</span>
+        <span class="pill">CSV upload: audit your own model</span><span class="pill">33 tests</span>
+        <span class="pill">Docker + CI</span><span class="pill">Methodology docs</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ ROW 2: FINDINGS ============ -->
+  <div class="row r-three">
+    <section class="card">
+      <h2><span class="n">4</span> Finding 1 · Disagreement predicts error</h2>
+      <figure>
+        <img src="{{FIG_SCATTER}}" alt="Trust score against true-driver precision">
+        <figcaption>Each point is one prediction: agreement among the five methods (x) versus the share of their top
+          features that are genuinely informative (y).</figcaption>
+      </figure>
+      <div class="finding good"><b>The score earns its keep.</b> It is computed without any ground truth, yet tracks
+        ground-truth correctness at <b>r = +0.61</b> — so an analyst can know when to distrust an explanation on real
+        data, where truth is unavailable.</div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">5</span> Finding 2 · Correlation erodes agreement</h2>
+      <figure>
+        <img src="{{FIG_RHO}}" alt="Mean trust score versus feature correlation by model family">
+        <figcaption>Mean Trust Score as pairwise feature correlation ρ rises from 0 to 0.95, by model family.</figcaption>
+      </figure>
+      <div class="finding warn"><b>Interpretability is a property of the model, not only of the tool.</b>
+        Tree ensembles and the neural net lose ≈ 10 points of agreement and ≈ 17 points of explanation accuracy.
+        Logistic regression is unmoved (≈ 94) at every correlation level.</div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">6</span> Finding 3 · The method matters</h2>
+      <figure>
+        <img src="{{FIG_PRECISION}}" alt="True-driver precision by explanation method">
+        <figcaption>Share of each method's top-4 features that are genuine drivers, averaged over the benchmark.</figcaption>
+      </figure>
+      <div class="finding warn"><b>Local gradients fail on trees; beware circular evaluation.</b>
+        Tree ensembles are piecewise constant, so SmoothGrad's local gradient is near-zero and uninformative.
+        Separately, Occlusion wins the removal-based faithfulness tests — but those tests <em>use Occlusion's own
+        removal operation</em>. Against ground truth it is mid-table.</div>
+    </section>
+  </div>
+
+  <!-- ============ ROW 3 ============ -->
+  <div class="row r-bottom">
+    <section class="card">
+      <h2><span class="n">7</span> Same accuracy, different explainability</h2>
+      <figure>
+        <img src="{{FIG_MODELS}}" alt="Mean trust score by model family at matched accuracy">
+        <figcaption>Credit-risk data, 30 predictions per model, ±1 SD. All four models sit within 0.03 AUC of each
+          other, yet their explanations differ in reliability by more than 20 points.</figcaption>
+      </figure>
+      <div class="finding"><b>A model-selection argument.</b> Accuracy cannot tell you how explainable a model will
+        be. Where explanations carry legal or clinical weight, this makes the trade-off visible <em>before</em>
+        deployment rather than after a contested decision.</div>
+      <div class="stat-row">
+        <div class="stat"><div class="v">2,000</div><div class="l">explanations in the benchmark</div></div>
+        <div class="stat"><div class="v">10</div><div class="l">method pairs scored per prediction</div></div>
+        <div class="stat"><div class="v">&lt;0.5 s</div><div class="l">all five methods, one prediction</div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">8</span> Limitations &amp; misuse risks</h2>
+      <ul>
+        <li class="warn"><b>Agreement is not truth.</b> All five can agree and still be wrong — notably when the
+          model genuinely relies on a proxy. The score is a warning light, not a certificate.</li>
+        <li class="warn"><b>Circularity.</b> Removal-based faithfulness metrics favour removal-based explainers;
+          reported openly inside the tool.</li>
+        <li class="warn"><b>Off-manifold perturbation.</b> Under strong correlation every perturbation method
+          queries the model on inputs that could not occur — part of <em>why</em> they diverge.</li>
+        <li class="risk"><b>Explanation-washing.</b> The likeliest misuse is citing a high Trust Score as evidence
+          that a model is fair or compliant. It certifies only that <b>methods concur</b>; it says nothing about
+          accuracy, bias or appropriateness. It belongs <em>alongside</em> model validation, never instead of it.</li>
+        <li class="risk"><b>Score-shopping.</b> k, the background sample or the method set could be tuned until the
+          number flatters. Mitigations: fixed defaults, seeded runs, exported reports that record the configuration.</li>
+        <li><b>Scope.</b> Tabular binary classification; multi-class one-vs-rest. Bands (70 / 50) are reasoned, not
+          yet calibrated.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">9</span> Who it is for, and what is next</h2>
+      <ul>
+        <li><b>Data scientists</b> gain a reason to choose a method rather than a habit.</li>
+        <li><b>Auditors and compliance teams</b> gain a per-decision flag for "do not present a single explanation
+          here".</li>
+        <li><b>Affected people</b> deserve a reason for a decision that does not depend on which library the analyst
+          happened to import.</li>
+      </ul>
+      <h3>Future work</h3>
+      <ul>
+        <li class="ok"><b>Calibrate the bands.</b> Fit Trust Score → probability-of-correctness by isotonic
+          regression on the benchmark, turning a 0–100 heuristic into a stated error rate.</li>
+        <li class="ok"><b>On-manifold explanations.</b> Conditional Shapley values, to test whether the correlation
+          effect is an artefact of off-manifold sampling.</li>
+        <li class="ok"><b>Stability as a sixth signal.</b> Re-run each method under different seeds to separate
+          sampling noise from genuine methodological disagreement.</li>
+        <li class="ok"><b>Human study.</b> Does showing a Trust Score change what practitioners do with an
+          explanation? The problem was found through practitioner interviews; the remedy should be tested the same
+          way.</li>
+        <li class="ok"><b>Beyond tabular.</b> Text and vision models, where attribution disagreement is less studied
+          and arguably more consequential.</li>
+      </ul>
+    </section>
+  </div>
+
+</main>
+
+<footer>
+  <div>
+    <h4>References</h4>
+    <div class="refs">
+      [1] Krishna, Han, Gu, Pombra, Jabbari, Wu &amp; Lakkaraju (2022). <i>The Disagreement Problem in Explainable
+      Machine Learning: A Practitioner's Perspective.</i> arXiv:2202.01602 ·
+      [2] Lundberg &amp; Lee (2017). <i>A Unified Approach to Interpreting Model Predictions.</i> NeurIPS ·
+      [3] Štrumbelj &amp; Kononenko (2014). <i>Explaining prediction models and individual predictions with feature
+      contributions.</i> KAIS · [4] Ribeiro, Singh &amp; Guestrin (2016). <i>"Why Should I Trust You?"</i> KDD ·
+      [5] Sundararajan, Taly &amp; Yan (2017). <i>Axiomatic Attribution for Deep Networks.</i> ICML ·
+      [6] Smilkov et al. (2017). <i>SmoothGrad.</i> arXiv:1706.03825 ·
+      [7] Agarwal et al. (2022). <i>OpenXAI.</i> NeurIPS Datasets &amp; Benchmarks ·
+      [8] Zeiler &amp; Fergus (2014). <i>Visualizing and Understanding Convolutional Networks.</i> ECCV.
+      <br><b>Data:</b> seeded synthetic generators in-repo; UCI Breast Cancer Wisconsin and Efron et al. diabetes via
+      scikit-learn. <b>AI use:</b> development assisted by Claude (Anthropic), per course policy.
+    </div>
+  </div>
+  <div>
+    <h4>Run it yourself</h4>
+    <div class="run">
+      <code>./run.sh</code> → dashboard<br>
+      <code>./run.sh api</code> → REST API · <code>./run.sh test</code> → 33 tests<br>
+      <code>./run.sh bench</code> → regenerate every number on this poster<br>
+      <span style="font-size:28px; color:var(--muted)">Runs offline on a laptop. No GPU, no API keys.</span><br>
+      {{REPO_LINE}}
+    </div>
+  </div>
+  {{QR_BLOCK}}
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>XAI Disagreement Auditor — Poster Report</title>
+<style>
+  @page { size: 8.5in 11in; margin: 0.58in 0.6in 0.52in 0.6in; }
+  :root{
+    --ink:#0b0b0b; --ink2:#2f2e2c; --ink3:#52514e; --muted:#7c7a74; --rule:#dcdbd4;
+    --blue:#2a78d6; --navy:#0d366b; --yellow:#eda100; --red:#d03b3b; --green:#0ca30c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{width:auto; height:auto;}
+  body{
+    font-family:"Helvetica Neue", Helvetica, Arial, "DejaVu Sans", sans-serif;
+    font-size:12px; line-height:1.5; color:var(--ink2); background:#fff;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .page{padding:0;}
+  b,strong{color:var(--ink); font-weight:700;}
+  em{font-style:normal; color:var(--navy); font-weight:600;}
+
+  header{border-bottom:3px solid var(--navy); padding-bottom:12px; margin-bottom:16px;}
+  .eyebrow{font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); font-weight:700;}
+  h1{font-size:25px; line-height:1.1; letter-spacing:-.02em; color:var(--ink); font-weight:800; margin:6px 0 5px 0;}
+  .sub{font-size:12.5px; color:var(--ink3);}
+  .byline{font-size:10.5px; color:var(--muted); margin-top:7px;}
+
+  h2{font-size:12.5px; font-weight:800; color:var(--ink); text-transform:uppercase; letter-spacing:.07em;
+     margin:15px 0 5px 0; display:flex; align-items:center; gap:8px;}
+  h2::after{content:""; flex:1; height:2px; background:var(--rule);}
+  p{margin-top:6px;}
+  p.tight{margin-top:3px;}
+
+  ul{margin:5px 0 0 0; list-style:none;}
+  li{position:relative; padding-left:16px; margin-top:5px;}
+  li::before{content:""; position:absolute; left:2px; top:6px; width:6px; height:6px; border-radius:2px; background:var(--blue);}
+  li.warn::before{background:var(--yellow);} li.risk::before{background:var(--red);} li.ok::before{background:var(--green);}
+
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:11px;}
+  th{text-align:left; font-size:9.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);
+     font-weight:700; padding:0 8px 5px 0; border-bottom:2px solid var(--rule);}
+  td{padding:5px 8px 5px 0; border-bottom:1px solid #eeede8; vertical-align:top;}
+  td.k{font-weight:700; color:var(--ink); white-space:nowrap;}
+
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  .hero{display:flex; gap:16px; align-items:center; background:#f2f7fd; border:1px solid #cfe1f8;
+        border-radius:10px; padding:11px 14px; margin-top:9px;}
+  .hero .n{white-space:nowrap; font-size:28px; font-weight:800; color:var(--navy); line-height:1; letter-spacing:-.02em;}
+  .hero .t{font-size:11px; color:var(--ink3);}
+  .note{border-left:4px solid var(--yellow); background:#fff8e6; border-radius:7px; padding:9px 12px; margin-top:9px; font-size:11px;}
+  .note.risk{border-left-color:var(--red); background:#fdf0f0;}
+  code{font-family:"DejaVu Sans Mono", Menlo, Consolas, monospace; font-size:10.5px; background:#f1f0ec;
+       border-radius:4px; padding:1px 5px; color:var(--ink);}
+  h2, .hero, .note, table, .cols{break-inside:avoid; page-break-inside:avoid;}
+  tr{break-inside:avoid;}
+  footer{margin-top:16px; padding-top:9px; border-top:1px solid var(--rule); font-size:9.5px; color:var(--muted); line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">AIPI 590 · Emerging Trends in Explainable AI · Project 1 · Poster companion</div>
+  <h1>XAI Disagreement Auditor</h1>
+  <div class="sub">A per-prediction Explanation Trust Score for post-hoc XAI, and a ground-truth benchmark
+    testing whether disagreement signals that explanations are wrong.</div>
+  <div class="byline">Mauzam Shafi Bhat · Duke University · Fall 2026 · Instructor: Dr. Brinnae Bent</div>
+</header>
+
+<h2>The problem</h2>
+<p class="tight">Post-hoc explainers — SHAP, LIME, Integrated Gradients — are how high-stakes model decisions get
+justified, and increasingly how organisations demonstrate compliance. Run several on the <b>same</b> prediction and
+they routinely disagree: different top features, different rankings, sometimes opposite directions. Krishna et al.
+(2022) named this the <em>disagreement problem</em> and found practitioners resolve it by intuition or by defaulting
+to a favourite tool. Nobody is told <b>when</b> an explanation is unreliable: a single SHAP plot looks equally
+authoritative whether every method agrees with it or none do.</p>
+
+<h2>What I built</h2>
+<p class="tight">Five attribution methods run on every prediction; six pairwise agreement metrics (Krishna et al.)
+score all ten method pairs; the result is an <b>Explanation Trust Score, 0–100</b>, plus a list of <em>contested</em>
+features — those in some methods' top-k but not others', or pushed in opposite directions. All five methods are
+implemented from scratch in NumPy so they share one model, one background sample and one baseline, making
+disagreement methodological rather than an artefact of library defaults. Unit tests confirm each is exact on linear
+models and that the Shapley estimator matches the reference <code>shap</code> library at r &gt; 0.99.</p>
+<p class="tight">Correctness is checked two independent ways: <b>faithfulness</b> (PGI, PGU and deletion curves
+against a random-attribution control — does the explanation match the <em>model</em>?) and <b>ground truth</b>
+(synthetic data whose real drivers are known — does it match <em>reality</em>?).</p>
+
+<h2>How to read the poster</h2>
+<table>
+  <tr><th style="width:62px">Panel</th><th>What it shows</th></tr>
+  <tr><td class="k">1</td><td>The problem, the three research questions, the five methods audited</td></tr>
+  <tr><td class="k">2 · the hook</td><td>One loan applicant, five methods. Each cell is that method's <b>rank</b> for a feature.
+    debt_to_income is #1 for three methods and #9 for a fourth; customer_id_hash, a meaningless identifier by
+    construction, reaches the top 2 for two methods. Trust Score 56/100.</td></tr>
+  <tr><td class="k">3</td><td>The four-step pipeline, the Trust Score formula, the two verification routes, the delivered artifact</td></tr>
+  <tr><td class="k">4 · main result</td><td>Trust Score vs. true-driver precision across 400 predictions</td></tr>
+  <tr><td class="k">5</td><td>Agreement vs. feature correlation ρ, by model family</td></tr>
+  <tr><td class="k">6</td><td>Which method actually recovers the true drivers</td></tr>
+  <tr><td class="k">7</td><td>Four models at matched accuracy, 24 points apart in explanation reliability</td></tr>
+  <tr><td class="k">8 – 9</td><td>Limitations, misuse risks, stakeholders, future work</td></tr>
+</table>
+
+<h2>Findings</h2>
+<div class="hero">
+  <div class="n">r = +0.61</div>
+  <div class="t"><b>Disagreement predicts error.</b> Across 400 predictions, the Trust Score — computed without any
+    ground truth — tracks how often the methods identify genuinely informative features. Low agreement is a usable
+    warning that the explanations are wrong, which is the signal practitioners currently lack.</div>
+</div>
+<div class="cols">
+  <div>
+    <p class="tight"><b>2 · Correlation erodes agreement.</b> As pairwise feature correlation rises from 0 to 0.95,
+      mean trust falls ≈ 10 points and explanation accuracy ≈ 17 points for tree ensembles and the neural network.
+      Logistic regression is unmoved at ≈ 94. Interpretability is a property of the model, not only of the tool.</p>
+  </div>
+  <div>
+    <p class="tight"><b>3 · The method matters.</b> True-driver precision: LIME 84%, Shapley 81%, Integrated
+      Gradients 79%, Occlusion 76%, SmoothGrad × Input 74%. Local gradients fail on tree ensembles, which are
+      piecewise constant, so the gradient is near-zero almost everywhere.</p>
+  </div>
+</div>
+<p class="tight" style="margin-top:7px;"><b>Evidence base.</b> Controlled benchmark: 8 synthetic features of which 4
+are informative by construction, ρ swept over 5 levels × 4 model families × 20 predictions = 400 predictions and
+2,000 explanations, all seeded and reproducible with one command.</p>
+
+<h2>Limitations, misuse risks and stakeholders</h2>
+<ul>
+  <li class="warn"><b>Agreement is not truth.</b> All five methods can agree and still be wrong, notably when the
+    model genuinely relies on a proxy. The score is a warning light, not a certificate.</li>
+  <li class="warn"><b>Circular evaluation.</b> The removal-based faithfulness tests use the same removal operation
+    as the Occlusion method, so they favour it; this is reported inside the tool rather than claimed as a win.
+    Scope is tabular binary classification, and the 70 / 50 bands are reasoned, not calibrated.</li>
+  <li class="risk"><b>Explanation-washing</b> is the likeliest misuse: quoting a high Trust Score as evidence that a
+    model is fair or compliant. It certifies only that methods <b>concur</b>. Sharper still — if a model relies on a
+    proxy for a protected attribute, faithful methods correctly agree on it and the score goes <b>up</b>, so
+    agreement can never be read as evidence of fairness.</li>
+  <li><b>Stakeholders.</b> Data scientists gain a reason to choose a method rather than a habit; auditors and
+    compliance teams gain a per-decision flag for "do not present a single explanation here"; affected people
+    deserve a reason for a decision that does not depend on which library the analyst imported.</li>
+</ul>
+
+<h2>Artifact and future work</h2>
+<p class="tight">Six-page interactive dashboard, REST API, CLI benchmark, CSV upload to audit any tabular model, 33
+tests, Docker, CI, and methodology plus responsible-use documentation. Every figure on the poster regenerates from
+the live code with <code>./run.sh bench</code>. Next: calibrate the bands by isotonic regression so the score becomes
+a stated error rate; conditional (on-manifold) Shapley values to test whether the correlation effect is an artefact
+of off-manifold sampling; seed-to-seed stability as a sixth signal; and a human study, since the disagreement
+problem was identified through practitioner interviews and the remedy deserves the same scrutiny.</p>
+
+<h2>Why it matters</h2>
+<p class="tight">Explainability is becoming a regulatory expectation, yet explanations ship with no reliability
+estimate attached — every other measurement discipline reports uncertainty; XAI mostly does not. This project
+contributes a per-prediction reliability signal that needs no ground truth, evidence that the signal is meaningful,
+and an open tool that reduces the check to a single upload.</p>
+
+<footer>
+  <b>Key references.</b> Krishna et al. (2022), <i>The Disagreement Problem in Explainable Machine Learning</i>,
+  arXiv:2202.01602 · Lundberg &amp; Lee (2017), NeurIPS · Štrumbelj &amp; Kononenko (2014), KAIS · Ribeiro et al.
+  (2016), KDD · Sundararajan et al. (2017), ICML · Smilkov et al. (2017), arXiv:1706.03825 · Agarwal et al. (2022),
+  <i>OpenXAI</i>, NeurIPS D&amp;B.<br>
+  <b>Data.</b> Seeded synthetic generators included in the repository; UCI Breast Cancer Wisconsin and Efron et al.
+  diabetes via scikit-learn. <b>AI use.</b> Development assisted by Claude (Anthropic), per course policy.
+</footer>
+
+</div>
+</body>
+</html>
